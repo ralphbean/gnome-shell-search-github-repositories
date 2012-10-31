@@ -22,14 +22,14 @@
 # Copyright (C) 2012 Red Hat, Inc.
 # Author: Luke Macken <lmacken@redhat.com>
 
-import gi.repository
-import gobject
 import dbus
 import dbus.glib
 import dbus.service
 import pkgwat.api
 import webbrowser
 
+from gi.repository import Gio
+import gobject
 
 class SearchFedoraPackagesService(dbus.service.Object):
     """ The FedoraPackages Search Daemon.
@@ -49,7 +49,7 @@ class SearchFedoraPackagesService(dbus.service.Object):
     __name__ = "SearchFedoraPackagesService"
 
     def __init__(self):
-        self.settings = gi.repository.Gio.Settings.new(self.bus_name)
+        self.settings = Gio.Settings.new(self.bus_name)
         if not self.settings.get_boolean('enabled'):
             return
 
