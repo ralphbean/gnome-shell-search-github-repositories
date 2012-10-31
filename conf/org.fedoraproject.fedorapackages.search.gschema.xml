@@ -2,7 +2,7 @@
 <schemalist>
   <schema id="org.fedoraproject.fedorapackages.search" path="/org/fedoraproject/fedorapackages/search/">
     <key type="b" name="enabled">
-      <default>false</default>
+      <default>true</default>
       <summary>fedora-packages search enabled</summary>
       <description>Whether or not gnome-shell search should return results from the Fedora Packages webapp</description>
     </key>

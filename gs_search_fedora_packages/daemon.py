@@ -22,12 +22,13 @@
 # Copyright (C) 2012 Red Hat, Inc.
 # Author: Luke Macken <lmacken@redhat.com>
 
+import gi.repository
+import gobject
 import dbus
 import dbus.glib
 import dbus.service
-
-from gi.repository import Gio
-import gobject
+import pkgwat.api
+import webbrowser
 
 
 class SearchFedoraPackagesService(dbus.service.Object):
@@ -38,17 +39,18 @@ class SearchFedoraPackagesService(dbus.service.Object):
 
     """
     bus_name = 'org.fedoraproject.fedorapackages.search'
+    search_bus_name = 'org.gnome.Shell.SearchProvider'
     msg_received_signal = bus_name + '.MessageReceived'
     enabled = False
+
+    http_prefix = "https://apps.fedoraproject.org/packages"
 
     _object_path = '/%s' % bus_name.replace('.', '/')
     __name__ = "SearchFedoraPackagesService"
 
     def __init__(self):
-        self.settings = Gio.Settings.new(self.bus_name)
+        self.settings = gi.repository.Gio.Settings.new(self.bus_name)
         if not self.settings.get_boolean('enabled'):
-            log.info('Disabled via %r configuration, exiting...' %
-                     self.config_key)
             return
 
         self.session_bus = dbus.SessionBus()
@@ -56,18 +58,48 @@ class SearchFedoraPackagesService(dbus.service.Object):
         dbus.service.Object.__init__(self, bus_name, self._object_path)
         self.enabled = True
 
-    @dbus.service.method(bus_name)
-    def Enable(self, *args, **kw):
-        """ A noop method called to activate this service over dbus """
+    @dbus.service.method(dbus_interface=search_bus_name,
+                         in_signature='s')
+    def ActivateResult(self, search_id):
+        webbrowser.open(http_prefix + "/" + search_id)
 
-    @dbus.service.method(bus_name)
-    def Disable(self, *args, **kw):
-        self.__del__()
+    @dbus.service.method(dbus_interface=search_bus_name,
+                         in_signature='as',
+                         out_signature='as')
+    def GetInitialResultSet(self, terms):
+        response = pkgwat.api.search(''.join(terms))
+        rows = response.get('rows', [])
+        rows = [row.get('name') for row in rows]
+        return rows
+
+    @dbus.service.method(dbus_interface=search_bus_name,
+                         in_signature='as',
+                         out_signature='aa{sv}')
+    def GetResultMetas(self, ids):
+        return [
+            dict(
+                id=id,
+                name=id,
+                # TODO -- make this a real deal icon
+                gicon=". GThemedIcon (null) application-pdf " +
+                "gnome-mime-application-pdf x-office-document",
+            ) for id in ids
+        ]
+
+    @dbus.service.method(dbus_interface=search_bus_name,
+                         in_signature='asas',
+                         out_signature='as')
+    def GetSubsearchResultSet(self, previous_results, new_terms):
+        response = pkgwat.api.search(''.join(terms))
+        rows = response.get('rows', [])
+        rows = [row.get('name') for row in rows]
+        return rows
 
 
 def main():
     service = SearchFedoraPackagesService()
-    gobject.main()
+    loop = gobject.MainLoop()
+    loop.run()
 
 if __name__ == '__main__':
     main()
