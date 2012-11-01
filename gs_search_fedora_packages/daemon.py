@@ -65,7 +65,7 @@ class SearchFedoraPackagesService(dbus.service.Object):
     @dbus.service.method(dbus_interface=search_bus_name,
                          in_signature='s')
     def ActivateResult(self, search_id):
-        webbrowser.open(http_prefix + "/" + search_id)
+        webbrowser.open(self.http_prefix + "/" + search_id.split(':')[0])
 
     @dbus.service.method(dbus_interface=search_bus_name,
                          in_signature='as',
@@ -99,7 +99,7 @@ class SearchFedoraPackagesService(dbus.service.Object):
 
         return filename
 
-    def _basic_search(terms):
+    def _basic_search(self, terms):
         response = pkgwat.api.search(''.join(terms))
         rows = response.get('rows', [])
         rows = [row.get('name') for row in rows]
