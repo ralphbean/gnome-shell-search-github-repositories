@@ -1,23 +1,22 @@
 from setuptools import setup
 
 requires = [
-    'fedmsg',
+    'pkgwat.api',
 ]
 
 setup(
-        name="fedmsg-notify",
-        version='0.2.1',
-        description="Consumer for fedmsg that spits out libnotify desktop notifications",
-        author="Luke Macken, Ross Delinger",
-        author_email="lmacken@redhat.com",
-        license='GPLv3',
-        install_requires=requires,
-        packages=['fedmsg_notify'],
-        zip_safe=False,
-        entry_points={
-            'console_scripts':
-                ['fedmsg-notify-config = fedmsg_notify.gui:main',
-                 'fedmsg-notify-daemon = fedmsg_notify.daemon:main'],
-            'moksha.consumer':
-                ['fedmsg-notify = fedmsg_notify.daemon:FedmsgNotifyService'],
-             },)
+    name="gnome-shell-search-fedora-packages",
+    version='1.0.0b',
+    description="A gnome shell search provider for apps.fp.o/packages",
+    author="Ralph Bean",
+    author_email="rbean@redhat.com",
+    license='GPLv3',
+    install_requires=requires,
+    packages=['gs_search_fedora_packages'],
+    zip_safe=False,
+    entry_points={
+        'console_scripts': [
+            'gnome-shell-search-fedora-packages-daemon = gs_search_fedora_packages.daemon:main',
+        ],
+    }
+)

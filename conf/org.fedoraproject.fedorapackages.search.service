@@ -1,0 +1,3 @@
+[D-BUS Service]
+Name=org.fedoraproject.fedorapackages.search
+Exec=/usr/bin/gnome-shell-search-fedora-packages-daemon
