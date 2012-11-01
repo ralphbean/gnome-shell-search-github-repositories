@@ -71,10 +71,7 @@ class SearchFedoraPackagesService(dbus.service.Object):
                          in_signature='as',
                          out_signature='as')
     def GetInitialResultSet(self, terms):
-        response = pkgwat.api.search(''.join(terms))
-        rows = response.get('rows', [])
-        rows = [row.get('name') + ":" + row.get('icon') for row in rows]
-        return rows
+        return self._basic_search(terms)
 
     @dbus.service.method(dbus_interface=search_bus_name,
                          in_signature='as',
@@ -92,10 +89,7 @@ class SearchFedoraPackagesService(dbus.service.Object):
                          in_signature='asas',
                          out_signature='as')
     def GetSubsearchResultSet(self, previous_results, new_terms):
-        response = pkgwat.api.search(''.join(terms))
-        rows = response.get('rows', [])
-        rows = [row.get('name') for row in rows]
-        return rows
+        return self._basic_search(new_terms)
 
     def iconify(self, filetoken):
         filename = self._icon_cache.get(filetoken)
@@ -105,7 +99,11 @@ class SearchFedoraPackagesService(dbus.service.Object):
 
         return filename
 
-
+    def _basic_search(terms):
+        response = pkgwat.api.search(''.join(terms))
+        rows = response.get('rows', [])
+        rows = [row.get('name') for row in rows]
+        return rows
 
 
 def main():
