@@ -11,7 +11,7 @@ Summary:        Search the Fedora Packages webapp from the gnome-shell
 
 License:        GPLv3+
 URL:            https://github.com/ralphbean/gnome-shell-search-fedora-packages
-Source0:        https://github.com/downloads/ralphbean/%{name}/%{name}-%{version}.tar.gz
+Source0:        https://pypi.python.org/packages/source/g/%{name}/%{name}-%{version}.tar.gz
 
 BuildArch:      noarch
 
