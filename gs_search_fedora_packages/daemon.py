@@ -26,10 +26,12 @@ import dbus
 import dbus.glib
 import dbus.service
 import pkgwat.api
+import urllib
 import webbrowser
 
 from gi.repository import Gio
 import gobject
+
 
 class SearchFedoraPackagesService(dbus.service.Object):
     """ The FedoraPackages Search Daemon.
@@ -44,7 +46,9 @@ class SearchFedoraPackagesService(dbus.service.Object):
     enabled = False
 
     http_prefix = "https://apps.fedoraproject.org/packages"
+    icon_tmpl = "https://apps.fedoraproject.org/packages/images/icons/%s.png"
 
+    _icon_cache = {}
     _object_path = '/%s' % bus_name.replace('.', '/')
     __name__ = "SearchFedoraPackagesService"
 
@@ -69,7 +73,7 @@ class SearchFedoraPackagesService(dbus.service.Object):
     def GetInitialResultSet(self, terms):
         response = pkgwat.api.search(''.join(terms))
         rows = response.get('rows', [])
-        rows = [row.get('name') for row in rows]
+        rows = [row.get('name') + ":" + row.get('icon') for row in rows]
         return rows
 
     @dbus.service.method(dbus_interface=search_bus_name,
@@ -79,10 +83,8 @@ class SearchFedoraPackagesService(dbus.service.Object):
         return [
             dict(
                 id=id,
-                name=id,
-                # TODO -- make this a real deal icon
-                gicon=". GThemedIcon (null) application-pdf " +
-                "gnome-mime-application-pdf x-office-document",
+                name=id.split(":")[0],
+                gicon=self.iconify(id.split(":")[-1]),
             ) for id in ids
         ]
 
@@ -94,6 +96,16 @@ class SearchFedoraPackagesService(dbus.service.Object):
         rows = response.get('rows', [])
         rows = [row.get('name') for row in rows]
         return rows
+
+    def iconify(self, filetoken):
+        filename = self._icon_cache.get(filetoken)
+        if not filename:
+            filename, headers = urllib.urlretrieve(self.icon_tmpl % filetoken)
+            self._icon_cache[filetoken] = filename
+
+        return filename
+
+
 
 
 def main():
