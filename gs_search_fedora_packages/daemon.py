@@ -25,7 +25,9 @@
 import dbus
 import dbus.glib
 import dbus.service
+import os
 import pkgwat.api
+import requests
 import urllib
 import webbrowser
 
@@ -35,6 +37,7 @@ import gobject
 
 # Convenience shorthand for declaring dbus interface methods.
 # s.b.n. -> search_bus_name
+search_bus_name = 'org.gnome.Shell.SearchProvider'
 sbn = dict(dbus_interface=search_bus_name)
 
 
@@ -46,7 +49,6 @@ class SearchFedoraPackagesService(dbus.service.Object):
 
     """
     bus_name = 'org.fedoraproject.fedorapackages.search'
-    search_bus_name = 'org.gnome.Shell.SearchProvider'
     msg_received_signal = bus_name + '.MessageReceived'
     enabled = False
 
@@ -54,6 +56,7 @@ class SearchFedoraPackagesService(dbus.service.Object):
     icon_tmpl = "https://apps.fedoraproject.org/packages/images/icons/%s.png"
 
     _icon_cache = {}
+    _icon_cache_dir = os.path.expanduser("~/.cache/search-fedora-packages/")
     _object_path = '/%s' % bus_name.replace('.', '/')
     __name__ = "SearchFedoraPackagesService"
 
@@ -65,6 +68,7 @@ class SearchFedoraPackagesService(dbus.service.Object):
         self.session_bus = dbus.SessionBus()
         bus_name = dbus.service.BusName(self.bus_name, bus=self.session_bus)
         dbus.service.Object.__init__(self, bus_name, self._object_path)
+        self._initialize_icon_cache()
         self.enabled = True
 
     @dbus.service.method(in_signature='s', **sbn)
@@ -77,6 +81,8 @@ class SearchFedoraPackagesService(dbus.service.Object):
 
     @dbus.service.method(in_signature='as', out_signature='aa{sv}', **sbn)
     def GetResultMetas(self, ids):
+        for id in ids:
+            print id, id.split(":")
         return [
             dict(
                 id=id,
@@ -91,16 +97,30 @@ class SearchFedoraPackagesService(dbus.service.Object):
 
     def iconify(self, filetoken):
         filename = self._icon_cache.get(filetoken)
+
+        # If its not in our in-memory cache, then we assume it is also not on
+        # disk in the _icon_cache_dir.  Grab it, save it to the fs, and cache
+        # the association.
         if not filename:
-            filename, headers = urllib.urlretrieve(self.icon_tmpl % filetoken)
+            url = self.icon_tmpl % filetoken
+            filename = self._icon_cache_dir + filetoken + ".png"
+            urllib.urlretrieve(url, filename)
             self._icon_cache[filetoken] = filename
 
         return filename
 
+    def _initialize_icon_cache(self):
+        if not os.path.isdir(self._icon_cache_dir):
+            os.mkdir(self._icon_cache_dir)
+
+        # Populate our in-memory cache from the file system
+        for filename in os.listdir(self._icon_cache_dir):
+            self._icon_cache[filename[:-4]] = self._icon_cache_dir + filename
+
     def _basic_search(self, terms):
         response = pkgwat.api.search(''.join(terms))
         rows = response.get('rows', [])
-        rows = [row.get('name') for row in rows]
+        rows = [row.get('name') + ":" + row.get('icon') for row in rows]
         return rows
 
 
