@@ -5,13 +5,13 @@
 %global busname org.fedoraproject.fedorapackages.search
 
 Name:           gnome-shell-search-fedora-packages
-Version:        1.0.0a
+Version:        1.0.0rc1
 Release:        1%{?dist}
 Summary:        Search the Fedora Packages webapp from the gnome-shell
 
 License:        GPLv3+
 URL:            https://github.com/ralphbean/gnome-shell-search-fedora-packages
-Source0:        https://github.com/downloads/ralphbean/%{name}/%{name}-%{version}.tar.gz
+Source0:        https://pypi.python.org/packages/source/g/%{name}/%{name}-%{version}.tar.gz
 
 BuildArch:      noarch
 
@@ -78,6 +78,9 @@ glib-compile-schemas %{_datadir}/glib-2.0/schemas &> /dev/null || :
 
 
 %changelog
+* Thu Nov 01 2012 Ralph Bean <rbean@redhat.com> - 1.0.0b-1
+- Got it basically working now.
+
 * Wed Oct 31 2012 Ralph Bean <rbean@redhat.com> - 1.0.0a-1
 - Forked from fedmsg-notify to create gnome-shell-search-fedora-packages.
 

@@ -6,8 +6,9 @@ requires = [
 
 setup(
     name="gnome-shell-search-fedora-packages",
-    version='1.0.0b',
+    version='1.0.0rc1',
     description="A gnome shell search provider for apps.fp.o/packages",
+    url="http://github.com/ralphbean/gnome-shell-search-fedora-packages",
     author="Ralph Bean",
     author_email="rbean@redhat.com",
     license='GPLv3',
