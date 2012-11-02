@@ -57,6 +57,8 @@ class SearchFedoraPackagesService(dbus.service.Object):
 
     _icon_cache = {}
     _icon_cache_dir = os.path.expanduser("~/.cache/search-fedora-packages/")
+    _search_cache = {}
+
     _object_path = '/%s' % bus_name.replace('.', '/')
     __name__ = "SearchFedoraPackagesService"
 
@@ -118,10 +120,15 @@ class SearchFedoraPackagesService(dbus.service.Object):
             self._icon_cache[filename[:-4]] = self._icon_cache_dir + filename
 
     def _basic_search(self, terms):
-        response = pkgwat.api.search(''.join(terms))
-        rows = response.get('rows', [])
-        rows = [row.get('name') + ":" + row.get('icon') for row in rows]
-        return rows
+        term = ''.join(terms)
+
+        if not term in self._search_cache:
+            response = pkgwat.api.search(term)
+            rows = response.get('rows', [])
+            rows = [row.get('name') + ":" + row.get('icon') for row in rows]
+            self._search_cache[term] = rows
+
+        return self._search_cache[term]
 
 
 def main():

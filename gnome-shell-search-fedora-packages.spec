@@ -5,7 +5,7 @@
 %global busname org.fedoraproject.fedorapackages.search
 
 Name:           gnome-shell-search-fedora-packages
-Version:        1.0.0b
+Version:        1.0.0rc1
 Release:        1%{?dist}
 Summary:        Search the Fedora Packages webapp from the gnome-shell
 
