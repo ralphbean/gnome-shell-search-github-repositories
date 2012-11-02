@@ -33,6 +33,11 @@ from gi.repository import Gio
 import gobject
 
 
+# Convenience shorthand for declaring dbus interface methods.
+# s.b.n. -> search_bus_name
+sbn = dict(dbus_interface=search_bus_name)
+
+
 class SearchFedoraPackagesService(dbus.service.Object):
     """ The FedoraPackages Search Daemon.
 
@@ -62,20 +67,15 @@ class SearchFedoraPackagesService(dbus.service.Object):
         dbus.service.Object.__init__(self, bus_name, self._object_path)
         self.enabled = True
 
-    @dbus.service.method(dbus_interface=search_bus_name,
-                         in_signature='s')
+    @dbus.service.method(in_signature='s', **sbn)
     def ActivateResult(self, search_id):
         webbrowser.open(self.http_prefix + "/" + search_id.split(':')[0])
 
-    @dbus.service.method(dbus_interface=search_bus_name,
-                         in_signature='as',
-                         out_signature='as')
+    @dbus.service.method(in_signature='as', out_signature='as', **sbn)
     def GetInitialResultSet(self, terms):
         return self._basic_search(terms)
 
-    @dbus.service.method(dbus_interface=search_bus_name,
-                         in_signature='as',
-                         out_signature='aa{sv}')
+    @dbus.service.method(in_signature='as', out_signature='aa{sv}', **sbn)
     def GetResultMetas(self, ids):
         return [
             dict(
@@ -85,9 +85,7 @@ class SearchFedoraPackagesService(dbus.service.Object):
             ) for id in ids
         ]
 
-    @dbus.service.method(dbus_interface=search_bus_name,
-                         in_signature='asas',
-                         out_signature='as')
+    @dbus.service.method(in_signature='asas', out_signature='as', **sbn)
     def GetSubsearchResultSet(self, previous_results, new_terms):
         return self._basic_search(new_terms)
 
