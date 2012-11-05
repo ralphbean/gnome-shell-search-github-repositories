@@ -80,6 +80,7 @@ class SearchGithubRepositoriesService(dbus.service.Object):
     _icon_cache = {}
     _icon_cache_dir = os.path.expanduser("~/.cache/search-github-repos/")
     _search_cache = {}
+    _request_cache = {}
 
     _object_path = '/%s' % bus_name.replace('.', '/')
     __name__ = "SearchGithubRepositoriesService"
