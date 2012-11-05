@@ -77,8 +77,11 @@ class SearchGithubRepositoriesService(dbus.service.Object):
     icon_tmpl = "https://secure.gravatar.com/avatar/%s"
     http_prefix = "https://github.com"
 
-    _icon_cache = {}
+    # 1 file System cache
     _icon_cache_dir = os.path.expanduser("~/.cache/search-github-repos/")
+
+    # 3 in-memory caches
+    _icon_cache = {}
     _search_cache = {}
     _request_cache = {}
 
@@ -106,9 +109,6 @@ class SearchGithubRepositoriesService(dbus.service.Object):
 
     @dbus.service.method(in_signature='as', out_signature='aa{sv}', **sbn)
     def GetResultMetas(self, ids):
-        for id in ids:
-            print id, id.split(":")
-
         return [
             dict(
                 id=id,
@@ -146,7 +146,6 @@ class SearchGithubRepositoriesService(dbus.service.Object):
     def _basic_search(self, terms):
         term = ''.join(terms)
 
-        print term, term in self._search_cache
         if not term in self._search_cache:
             # TODO -- parameterize this through gsettings, gschema
             username = "ralphbean"
