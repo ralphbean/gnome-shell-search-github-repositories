@@ -1,32 +1,31 @@
-# This file is a part of search-fedorapackages.
+# This file is a part of search-githubrepos.
 #
-# search-fedorapackages is free software: you can redistribute it and/or modify
+# search-githubrepos is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# search-fedorapackages is distributed in the hope that it will be useful,
+# search-githubrepos is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with search-fedorapackages.  If not, see
+# along with search-githubrepos.  If not, see
 # <http://www.gnu.org/licenses/>.
 #
 # Copyright (C) 2012 Red Hat, Inc.
 # Author: Ralph Bean <rbean@redhat.com>
 
-
 # Acknowledgement - This project was based on a fork from fedmsg-notify
 # Copyright (C) 2012 Red Hat, Inc.
 # Author: Luke Macken <lmacken@redhat.com>
+
 
 import dbus
 import dbus.glib
 import dbus.service
 import os
-import pkgwat.api
 import requests
 import urllib
 import webbrowser
@@ -40,27 +39,50 @@ import gobject
 search_bus_name = 'org.gnome.Shell.SearchProvider'
 sbn = dict(dbus_interface=search_bus_name)
 
+def link_field_to_dict(field):
+    return dict([
+        (
+            part.split('; ')[1][5:-1],
+            part.split('; ')[0][1:-1],
+        ) for part in field.split(', ')
+    ])
 
-class SearchFedoraPackagesService(dbus.service.Object):
-    """ The FedoraPackages Search Daemon.
+
+def get_all_repos(username):
+    tmpl = "https://api.github.com/users/{username}/repos?per_page=100"
+    url = tmpl.format(username=username)
+    results = []
+    link = dict(next=url)
+    while 'next' in link:
+        response = requests.get(link['next'])
+        if response.status_code != 200:
+            raise IOError("Non-200 status code %r" % response.status_code)
+
+        results += response.json
+        link = link_field_to_dict(response.headers['link'])
+
+    return results
+
+
+class SearchGithubRepositoriesService(dbus.service.Object):
+    """ The GithubRepositories Search Daemon.
 
     This service is started through DBus activation by calling the
     :meth:`Enable` method, and stopped with :meth:`Disable`.
 
     """
-    bus_name = 'org.fedoraproject.fedorapackages.search'
-    msg_received_signal = bus_name + '.MessageReceived'
+    bus_name = 'org.gnome.githubrepositories.search'
     enabled = False
 
-    http_prefix = "https://apps.fedoraproject.org/packages"
-    icon_tmpl = "https://apps.fedoraproject.org/packages/images/icons/%s.png"
+    icon_tmpl = "https://secure.gravatar.com/avatar/%s"
+    http_prefix = "https://github.com"
 
     _icon_cache = {}
-    _icon_cache_dir = os.path.expanduser("~/.cache/search-fedora-packages/")
+    _icon_cache_dir = os.path.expanduser("~/.cache/search-github-repos/")
     _search_cache = {}
 
     _object_path = '/%s' % bus_name.replace('.', '/')
-    __name__ = "SearchFedoraPackagesService"
+    __name__ = "SearchGithubRepositoriesService"
 
     def __init__(self):
         self.settings = Gio.Settings.new(self.bus_name)
@@ -85,6 +107,7 @@ class SearchFedoraPackagesService(dbus.service.Object):
     def GetResultMetas(self, ids):
         for id in ids:
             print id, id.split(":")
+
         return [
             dict(
                 id=id,
@@ -105,7 +128,7 @@ class SearchFedoraPackagesService(dbus.service.Object):
         # the association.
         if not filename:
             url = self.icon_tmpl % filetoken
-            filename = self._icon_cache_dir + filetoken + ".png"
+            filename = self._icon_cache_dir + filetoken
             urllib.urlretrieve(url, filename)
             self._icon_cache[filetoken] = filename
 
@@ -117,22 +140,32 @@ class SearchFedoraPackagesService(dbus.service.Object):
 
         # Populate our in-memory cache from the file system
         for filename in os.listdir(self._icon_cache_dir):
-            self._icon_cache[filename[:-4]] = self._icon_cache_dir + filename
+            self._icon_cache[filename] = self._icon_cache_dir + filename
 
     def _basic_search(self, terms):
         term = ''.join(terms)
 
+        print term, term in self._search_cache
         if not term in self._search_cache:
-            response = pkgwat.api.search(term)
-            rows = response.get('rows', [])
-            rows = [row.get('name') + ":" + row.get('icon') for row in rows]
+            # TODO -- parameterize this through gsettings, gschema
+            username = "ralphbean"
+            # TODO -- how to get organization repos too?
+
+            if not username in self._request_cache:
+                repos = get_all_repos(username)
+                self._request_cache[username] = repos
+
+            repos = self._request_cache[username]
+            matches = [r for r in repos if term in r['full_name']]
+            rows = [r['full_name'] + ":" + r['owner']['gravatar_id']
+                    for r in matches]
             self._search_cache[term] = rows
 
         return self._search_cache[term]
 
 
 def main():
-    service = SearchFedoraPackagesService()
+    service = SearchGithubRepositoriesService()
     loop = gobject.MainLoop()
     loop.run()
 
