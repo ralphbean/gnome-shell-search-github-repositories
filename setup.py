@@ -1,13 +1,13 @@
 from setuptools import setup
 
 requires = [
-    'pkgwat.api',
+    'requests',
 ]
 
 setup(
     name="gnome-shell-search-github-repositories",
-    version='1.0.0a',
-    description="A gnome shell search provider for apps.fp.o/repositories",
+    version='1.0.0rc2',
+    description="A gnome shell search provider for your github repos",
     url="http://github.com/ralphbean/gnome-shell-search-github-repositories",
     author="Ralph Bean",
     author_email="rbean@redhat.com",

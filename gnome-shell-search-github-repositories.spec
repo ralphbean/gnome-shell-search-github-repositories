@@ -5,7 +5,7 @@
 %global busname org.gnome.githubrepositories.search
 
 Name:           gnome-shell-search-github-repositories
-Version:        1.0.0a
+Version:        1.0.0rc2
 Release:        1%{?dist}
 Summary:        Search your Github Repos from the gnome-shell
 
@@ -86,6 +86,11 @@ glib-compile-schemas %{_datadir}/glib-2.0/schemas &> /dev/null || :
 
 
 %changelog
+* Tue Nov 06 2012 Ralph Bean <rbean@redhat.com> - 1.0.0rc2-1
+- Proof of concept.
+- Read auth from a config file.
+- Putting up for fedora review.
+
 * Wed Oct 31 2012 Ralph Bean <rbean@redhat.com> - 1.0.0a-1
 - Forked from gnome-shell-search-fedora-packages.
 
