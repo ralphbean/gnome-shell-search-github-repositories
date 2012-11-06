@@ -73,7 +73,7 @@ glib-compile-schemas %{_datadir}/glib-2.0/schemas &> /dev/null || :
 
 
 %files
-%doc README.md LICENSE
+%doc README.rst LICENSE
 %{_bindir}/%{name}-daemon
 
 %{python_sitelib}/%{modname}/
