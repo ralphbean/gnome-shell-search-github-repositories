@@ -170,7 +170,7 @@ class SearchGithubRepositoriesService(dbus.service.Object):
         if not term in self._search_cache:
             username, password = auth = load_auth()
 
-            # Not configured
+            # Not configured.. ~/.search-github is busted.
             if not username:
                 # TODO -- emit some kind of error message
                 return []
