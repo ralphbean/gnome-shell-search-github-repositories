@@ -22,6 +22,7 @@
 # Author: Luke Macken <lmacken@redhat.com>
 
 
+import ConfigParser
 import dbus
 import dbus.glib
 import dbus.service
@@ -39,6 +40,7 @@ import gobject
 search_bus_name = 'org.gnome.Shell.SearchProvider'
 sbn = dict(dbus_interface=search_bus_name)
 
+
 def link_field_to_dict(field):
     return dict([
         (
@@ -48,13 +50,32 @@ def link_field_to_dict(field):
     ])
 
 
-def get_all_repos(username):
+def load_auth():
+    """ We expect the user to keep a config file for us. """
+
+    # TODO -- consider using ~/.local/hub and share with the hub package
+    filename = os.path.expanduser("~/.search-github")
+    parser = ConfigParser.ConfigParser()
+    parser.read(filename)
+    try:
+        username = parser.get('github', 'username')
+        password = parser.get('github', 'password')
+        return username, password
+    except:
+        return None, None
+
+
+def get_all_repos(username, auth):
+    """ username should be a string
+    auth should be a tuple of username and password.
+    """
+
     tmpl = "https://api.github.com/users/{username}/repos?per_page=100"
     url = tmpl.format(username=username)
     results = []
     link = dict(next=url)
     while 'next' in link:
-        response = requests.get(link['next'])
+        response = requests.get(link['next'], auth=auth)
         if response.status_code != 200:
             raise IOError("Non-200 status code %r" % response.status_code)
 
@@ -147,12 +168,15 @@ class SearchGithubRepositoriesService(dbus.service.Object):
         term = ''.join(terms)
 
         if not term in self._search_cache:
-            # TODO -- parameterize this through gsettings, gschema
-            username = "ralphbean"
-            # TODO -- how to get organization repos too?
+            username, password = auth = load_auth()
 
-            if not username in self._request_cache:
-                repos = get_all_repos(username)
+            # Not configured
+            if not username:
+                # TODO -- emit some kind of error message
+                return []
+
+            if username not in self._request_cache:
+                repos = get_all_repos(username, auth)
                 self._request_cache[username] = repos
 
             repos = self._request_cache[username]

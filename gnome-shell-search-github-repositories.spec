@@ -27,6 +27,16 @@ Requires:       python-requests
 gnome-shell-search-github-repositories includes results from your github
 repositories in gnome-shell search results.
 
+The search provider *will not work* without being configured.
+
+Create a file in your homedirectory at ~/.search-github with the following
+content:
+
+  [github]
+  username = YOUR_USERNAME
+  password = YOUR_PASSWORD
+
+
 %prep
 %setup -q
 
