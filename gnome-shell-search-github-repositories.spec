@@ -1,16 +1,16 @@
 %{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
 %{!?pyver: %global pyver %(%{__python} -c "import sys ; print sys.version[:3]")}
 
-%global modname gs_search_fedora_packages
-%global busname org.fedoraproject.fedorapackages.search
+%global modname gs_search_github_repositories
+%global busname org.gnome.githubrepositories.search
 
-Name:           gnome-shell-search-fedora-packages
-Version:        1.0.0rc1
+Name:           gnome-shell-search-github-repositories
+Version:        1.0.0rc2
 Release:        1%{?dist}
-Summary:        Search the Fedora Packages webapp from the gnome-shell
+Summary:        Search your Github Repos from the gnome-shell
 
 License:        GPLv3+
-URL:            https://github.com/ralphbean/gnome-shell-search-fedora-packages
+URL:            https://github.com/ralphbean/%{name}
 Source0:        https://pypi.python.org/packages/source/g/%{name}/%{name}-%{version}.tar.gz
 
 BuildArch:      noarch
@@ -19,21 +19,29 @@ BuildRequires:  python2-devel
 BuildRequires:  python-setuptools-devel
 BuildRequires:  pygobject3
 
-Requires:       python-pkgwat-api
+Requires:       gnome-shell
 Requires:       pygobject3
+Requires:       python-requests
 
 %description
-gnome-shell-search-fedora-packages provides a dbus daemon that returns results
-from the https://apps.fedoraproject.org/packages webapp to the gnome-shell
-search process.
+gnome-shell-search-github-repositories includes results from your github
+repositories in gnome-shell search results.
+
+The search provider *will not work* without being configured.
+
+Create a file in your homedirectory at ~/.search-github with the following
+content:
+
+  [github]
+  username = YOUR_USERNAME
+  password = YOUR_PASSWORD
+
 
 %prep
 %setup -q
 
-
 %build
 %{__python} setup.py build
-
 
 %install
 %{__python} setup.py install -O1 --skip-build \
@@ -69,7 +77,7 @@ glib-compile-schemas %{_datadir}/glib-2.0/schemas &> /dev/null || :
 %{_bindir}/%{name}-daemon
 
 %{python_sitelib}/%{modname}/
-%{python_sitelib}/gnome_shell_search_fedora_packages-%{version}-py%{pyver}.egg-info/
+%{python_sitelib}/gnome_shell_search_github_repositories-%{version}-py%{pyver}.egg-info/
 
 %{_datadir}/gnome-shell/search-providers/%{busname}.ini
 %{_datadir}/dbus-1/services/%{busname}.service
@@ -78,11 +86,13 @@ glib-compile-schemas %{_datadir}/glib-2.0/schemas &> /dev/null || :
 
 
 %changelog
-* Thu Nov 01 2012 Ralph Bean <rbean@redhat.com> - 1.0.0b-1
-- Got it basically working now.
+* Tue Nov 06 2012 Ralph Bean <rbean@redhat.com> - 1.0.0rc2-1
+- Proof of concept.
+- Read auth from a config file.
+- Putting up for fedora review.
 
 * Wed Oct 31 2012 Ralph Bean <rbean@redhat.com> - 1.0.0a-1
-- Forked from fedmsg-notify to create gnome-shell-search-fedora-packages.
+- Forked from gnome-shell-search-fedora-packages.
 
 * Tue Oct 30 2012 Luke Macken <lmacken@redhat.com> - 0.3.1-1
 - Update our gsettings schema to enable the service once installed.

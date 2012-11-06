@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.githubrepositories.search" path="/org/gnome/githubrepositories/search/">
+    <key type="b" name="enabled">
+      <default>true</default>
+      <summary>github repositories search enabled</summary>
+      <description>Whether or not gnome-shell search should return results from your Github repos</description>
+    </key>
+  </schema>
+</schemalist>
