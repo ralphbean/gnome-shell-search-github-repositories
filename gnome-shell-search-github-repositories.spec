@@ -5,7 +5,7 @@
 %global busname org.gnome.githubrepositories.search
 
 Name:           gnome-shell-search-github-repositories
-Version:        1.0.0rc2
+Version:        1.0.0
 Release:        1%{?dist}
 Summary:        Search your Github Repos from the gnome-shell
 
@@ -73,7 +73,7 @@ glib-compile-schemas %{_datadir}/glib-2.0/schemas &> /dev/null || :
 
 
 %files
-%doc README.md LICENSE
+%doc README.rst LICENSE
 %{_bindir}/%{name}-daemon
 
 %{python_sitelib}/%{modname}/
@@ -86,6 +86,9 @@ glib-compile-schemas %{_datadir}/glib-2.0/schemas &> /dev/null || :
 
 
 %changelog
+* Wed Nov 07 2012 Ralph Bean <rbean@redhat.com> - 1.0.0-1
+- Search organizations as well.
+
 * Tue Nov 06 2012 Ralph Bean <rbean@redhat.com> - 1.0.0rc2-1
 - Proof of concept.
 - Read auth from a config file.

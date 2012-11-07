@@ -22,67 +22,23 @@
 # Author: Luke Macken <lmacken@redhat.com>
 
 
-import ConfigParser
 import dbus
 import dbus.glib
 import dbus.service
 import os
-import requests
 import urllib
 import webbrowser
 
 from gi.repository import Gio
 import gobject
 
+import githubutils
+
 
 # Convenience shorthand for declaring dbus interface methods.
 # s.b.n. -> search_bus_name
 search_bus_name = 'org.gnome.Shell.SearchProvider'
 sbn = dict(dbus_interface=search_bus_name)
-
-
-def link_field_to_dict(field):
-    return dict([
-        (
-            part.split('; ')[1][5:-1],
-            part.split('; ')[0][1:-1],
-        ) for part in field.split(', ')
-    ])
-
-
-def load_auth():
-    """ We expect the user to keep a config file for us. """
-
-    # TODO -- consider using ~/.local/hub and share with the hub package
-    filename = os.path.expanduser("~/.search-github")
-    parser = ConfigParser.ConfigParser()
-    parser.read(filename)
-    try:
-        username = parser.get('github', 'username')
-        password = parser.get('github', 'password')
-        return username, password
-    except:
-        return None, None
-
-
-def get_all_repos(username, auth):
-    """ username should be a string
-    auth should be a tuple of username and password.
-    """
-
-    tmpl = "https://api.github.com/users/{username}/repos?per_page=100"
-    url = tmpl.format(username=username)
-    results = []
-    link = dict(next=url)
-    while 'next' in link:
-        response = requests.get(link['next'], auth=auth)
-        if response.status_code != 200:
-            raise IOError("Non-200 status code %r" % response.status_code)
-
-        results += response.json
-        link = link_field_to_dict(response.headers['link'])
-
-    return results
 
 
 class SearchGithubRepositoriesService(dbus.service.Object):
@@ -130,13 +86,11 @@ class SearchGithubRepositoriesService(dbus.service.Object):
 
     @dbus.service.method(in_signature='as', out_signature='aa{sv}', **sbn)
     def GetResultMetas(self, ids):
-        return [
-            dict(
-                id=id,
-                name=id.split(":")[0],
-                gicon=self.iconify(id.split(":")[-1]),
-            ) for id in ids
-        ]
+        return [dict(
+            id=id,
+            name=id.split(":")[0].split('/')[-1],
+            gicon=self.iconify(id.split(":")[-1]),
+        ) for id in ids]
 
     @dbus.service.method(in_signature='asas', out_signature='as', **sbn)
     def GetSubsearchResultSet(self, previous_results, new_terms):
@@ -167,22 +121,29 @@ class SearchGithubRepositoriesService(dbus.service.Object):
     def _basic_search(self, terms):
         term = ''.join(terms)
 
-        if not term in self._search_cache:
-            username, password = auth = load_auth()
-
-            # Not configured.. ~/.search-github is busted.
-            if not username:
-                # TODO -- emit some kind of error message
-                return []
-
+        def __build_rows(username, auth):
             if username not in self._request_cache:
-                repos = get_all_repos(username, auth)
+                repos = githubutils.get_all(username, auth, "repos")
                 self._request_cache[username] = repos
 
             repos = self._request_cache[username]
             matches = [r for r in repos if term in r['full_name']]
             rows = [r['full_name'] + ":" + r['owner']['gravatar_id']
                     for r in matches]
+            return rows
+
+        if not term in self._search_cache:
+            username, password = auth = githubutils.load_auth()
+
+            # Not configured.. ~/.search-github is busted.
+            if not username:
+                # TODO -- emit some kind of error message
+                return []
+
+            rows = __build_rows(username, auth)
+            for org in githubutils.get_all(username, auth, "orgs"):
+                rows += __build_rows(org['login'], auth)
+
             self._search_cache[term] = rows
 
         return self._search_cache[term]
