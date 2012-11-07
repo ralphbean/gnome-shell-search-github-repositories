@@ -133,7 +133,7 @@ class SearchGithubRepositoriesService(dbus.service.Object):
         return [
             dict(
                 id=id,
-                name=id.split(":")[0],
+                name=id.split(":")[0].split('/')[-1],
                 gicon=self.iconify(id.split(":")[-1]),
             ) for id in ids
         ]
