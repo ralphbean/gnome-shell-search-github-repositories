@@ -18,6 +18,7 @@ setup(
     entry_points={
         'console_scripts': [
             'gnome-shell-search-github-repositories-daemon = gs_search_github_repositories.daemon:main',
+            'gnome-shell-search-github-repositories-config = gs_search_github_repositories.popup:main',
         ],
     }
 )
