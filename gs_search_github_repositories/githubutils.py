@@ -5,8 +5,11 @@ I tried using pygithub3, but it really sucks.
 
 import os
 import ConfigParser
+import getpass
+import keyring
 import requests
 
+keyring_service = 'github-search-' + getpass.getuser()
 
 def _link_field_to_dict(field):
     """ Utility for ripping apart github's Link header field.
@@ -25,7 +28,7 @@ def _link_field_to_dict(field):
 
 
 def load_auth():
-    """ We expect the user to keep a config file for us.
+    """ Load auth from the keyring daemon.
 
     This is kind of a bummer.  It would be awesome if we could keep this in
     gnome-shell's Online Accounts thing, but I guess they built that as a Silo
@@ -33,16 +36,9 @@ def load_auth():
     without diving into gnome-shell proper.  Gotta do that some day, I guess.
     """
 
-    # TODO -- consider using ~/.local/hub and share with the hub package
-    filename = os.path.expanduser("~/.search-github")
-    parser = ConfigParser.ConfigParser()
-    parser.read(filename)
-    try:
-        username = parser.get('github', 'username')
-        password = parser.get('github', 'password')
-        return username, password
-    except:
-        return None, None
+    username = keyring.get_password(keyring_service, 'username')
+    password = keyring.get_password(keyring_service, 'password')
+    return username, password
 
 
 def get_all(username, auth, item="repos"):
@@ -62,6 +58,14 @@ def get_all(username, auth, item="repos"):
     link = dict(next=url)
     while 'next' in link:
         response = requests.get(link['next'], auth=auth)
+
+        # If authn failed, then flush the busted creds from the keyring.
+        # This way, the user will be prompted for the password next time.
+        if response.status_code == 401:
+            keyring.set_password(keyring_service, 'username', '')
+            keyring.set_password(keyring_service, 'password', '')
+
+        # And.. if we didn't get good results, just bail.
         if response.status_code != 200:
             raise IOError("Non-200 status code %r" % response.status_code)
 

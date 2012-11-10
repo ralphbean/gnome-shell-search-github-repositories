@@ -35,6 +35,8 @@ import gobject
 import githubutils
 
 
+config_tool = "gnome-shell-search-github-repositories-config"
+
 # Convenience shorthand for declaring dbus interface methods.
 # s.b.n. -> search_bus_name
 search_bus_name = 'org.gnome.Shell.SearchProvider'
@@ -137,7 +139,8 @@ class SearchGithubRepositoriesService(dbus.service.Object):
 
             # Not configured.. ~/.search-github is busted.
             if not username:
-                # TODO -- emit some kind of error message
+                # FIXME - this isn't totally working.
+                os.system(config_tool)
                 return []
 
             rows = __build_rows(username, auth)
