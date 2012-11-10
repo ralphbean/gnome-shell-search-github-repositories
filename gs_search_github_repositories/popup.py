@@ -4,6 +4,7 @@ from gi.repository import Gtk
 
 import os
 import sys
+import getpass
 import keyring
 
 
@@ -32,8 +33,9 @@ class Handler(object):
         Gtk.main_quit()
 
     def save_creds(self, username, password):
-        keyring.set_password("github-search", "username", username)
-        keyring.set_password("github-search", "password", password)
+        service = 'github-search-' + getpass.getuser()
+        keyring.set_password(service, "username", username)
+        keyring.set_password(service, "password", password)
 
 
 class lock_file(object):

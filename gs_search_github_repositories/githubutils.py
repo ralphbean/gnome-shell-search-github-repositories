@@ -5,6 +5,7 @@ I tried using pygithub3, but it really sucks.
 
 import os
 import ConfigParser
+import getpass
 import keyring
 import requests
 
@@ -34,8 +35,9 @@ def load_auth():
     without diving into gnome-shell proper.  Gotta do that some day, I guess.
     """
 
-    username = keyring.get_password('github-search', 'username')
-    password = keyring.get_password('github-search', 'password')
+    service = 'github-search-' + getpass.getuser()
+    username = keyring.get_password(service, 'username')
+    password = keyring.get_password(service, 'password')
     return username, password
 
 
