@@ -5,7 +5,7 @@
 %global busname org.gnome.githubrepositories.search
 
 Name:           gnome-shell-search-github-repositories
-Version:        1.0.0
+Version:        1.0.1
 Release:        1%{?dist}
 Summary:        Search your Github Repos from the gnome-shell
 
@@ -83,6 +83,11 @@ glib-compile-schemas %{_datadir}/glib-2.0/schemas &> /dev/null || :
 
 
 %changelog
+* Sat Nov 10 2012 Ralph Bean <rbean@redhat.com> - 1.0.1-1
+- No more ~/.search-github flat file with authn creds.
+- Prompt user for password with a gtk3 widget.
+- Store password in the gnome keyring.
+
 * Wed Nov 07 2012 Ralph Bean <rbean@redhat.com> - 1.0.0-1
 - Search organizations as well.
 
