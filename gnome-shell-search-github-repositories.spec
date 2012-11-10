@@ -5,7 +5,7 @@
 %global busname org.gnome.githubrepositories.search
 
 Name:           gnome-shell-search-github-repositories
-Version:        1.0.0
+Version:        1.0.1
 Release:        1%{?dist}
 Summary:        Search your Github Repos from the gnome-shell
 
@@ -22,20 +22,11 @@ BuildRequires:  pygobject3
 Requires:       gnome-shell
 Requires:       pygobject3
 Requires:       python-requests
+Requires:       python-keyring
 
 %description
 gnome-shell-search-github-repositories includes results from your github
 repositories in gnome-shell search results.
-
-The search provider *will not work* without being configured.
-
-Create a file in your homedirectory at ~/.search-github with the following
-content:
-
-  [github]
-  username = YOUR_USERNAME
-  password = YOUR_PASSWORD
-
 
 %prep
 %setup -q
@@ -46,6 +37,10 @@ content:
 %install
 %{__python} setup.py install -O1 --skip-build \
     --install-data=%{_datadir} --root %{buildroot}
+
+# Glade file
+mkdir -p %{buildroot}%{_datadir}/gnome-shell-search-github/
+install -m 0644 data/popup.glade %{buildroot}%{_datadir}/gnome-shell-search-github/popup.glade
 
 # Search provider definition
 mkdir -p %{buildroot}%{_datadir}/gnome-shell/search-providers
@@ -75,10 +70,12 @@ glib-compile-schemas %{_datadir}/glib-2.0/schemas &> /dev/null || :
 %files
 %doc README.rst LICENSE
 %{_bindir}/%{name}-daemon
+%{_bindir}/%{name}-config
 
 %{python_sitelib}/%{modname}/
 %{python_sitelib}/gnome_shell_search_github_repositories-%{version}-py%{pyver}.egg-info/
 
+%{_datadir}/gnome-shell-search-github/popup.glade
 %{_datadir}/gnome-shell/search-providers/%{busname}.ini
 %{_datadir}/dbus-1/services/%{busname}.service
 %{_sysconfdir}/dbus-1/system.d/%{busname}.conf
@@ -86,6 +83,11 @@ glib-compile-schemas %{_datadir}/glib-2.0/schemas &> /dev/null || :
 
 
 %changelog
+* Sat Nov 10 2012 Ralph Bean <rbean@redhat.com> - 1.0.1-1
+- No more ~/.search-github flat file with authn creds.
+- Prompt user for password with a gtk3 widget.
+- Store password in the gnome keyring.
+
 * Wed Nov 07 2012 Ralph Bean <rbean@redhat.com> - 1.0.0-1
 - Search organizations as well.
 

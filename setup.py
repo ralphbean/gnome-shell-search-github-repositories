@@ -2,11 +2,12 @@ from setuptools import setup
 
 requires = [
     'requests',
+    'keyring',
 ]
 
 setup(
     name="gnome-shell-search-github-repositories",
-    version='1.0.0',
+    version='1.0.1',
     description="A gnome shell search provider for your github repos",
     url="http://github.com/ralphbean/gnome-shell-search-github-repositories",
     author="Ralph Bean",
@@ -18,6 +19,7 @@ setup(
     entry_points={
         'console_scripts': [
             'gnome-shell-search-github-repositories-daemon = gs_search_github_repositories.daemon:main',
+            'gnome-shell-search-github-repositories-config = gs_search_github_repositories.popup:main',
         ],
     }
 )
