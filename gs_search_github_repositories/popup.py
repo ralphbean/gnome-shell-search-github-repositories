@@ -4,13 +4,7 @@ from gi.repository import Gtk
 
 import os
 import sys
-
-# TODO -- remove this in favor of the keyring thing
-tmpl = """
-[github]
-username={username}
-password={password}
-"""
+import keyring
 
 
 class Handler(object):
@@ -38,9 +32,8 @@ class Handler(object):
         Gtk.main_quit()
 
     def save_creds(self, username, password):
-        # TODO -- save this in the gtk-3 keyring
-        with open(os.path.expanduser("~/.search-github"), 'w') as f:
-            f.write(tmpl.format(username=username, password=password))
+        keyring.set_password("github-search", "username", username)
+        keyring.set_password("github-search", "password", password)
 
 
 class lock_file(object):

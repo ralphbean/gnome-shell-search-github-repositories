@@ -2,6 +2,7 @@ from setuptools import setup
 
 requires = [
     'requests',
+    'keyring',
 ]
 
 setup(

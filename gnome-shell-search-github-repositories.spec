@@ -22,6 +22,7 @@ BuildRequires:  pygobject3
 Requires:       gnome-shell
 Requires:       pygobject3
 Requires:       python-requests
+Requires:       python-keyring
 
 %description
 gnome-shell-search-github-repositories includes results from your github

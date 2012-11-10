@@ -5,6 +5,7 @@ I tried using pygithub3, but it really sucks.
 
 import os
 import ConfigParser
+import keyring
 import requests
 
 
@@ -25,7 +26,7 @@ def _link_field_to_dict(field):
 
 
 def load_auth():
-    """ We expect the user to keep a config file for us.
+    """ Load auth from the keyring daemon.
 
     This is kind of a bummer.  It would be awesome if we could keep this in
     gnome-shell's Online Accounts thing, but I guess they built that as a Silo
@@ -33,16 +34,9 @@ def load_auth():
     without diving into gnome-shell proper.  Gotta do that some day, I guess.
     """
 
-    # TODO -- consider using ~/.local/hub and share with the hub package
-    filename = os.path.expanduser("~/.search-github")
-    parser = ConfigParser.ConfigParser()
-    parser.read(filename)
-    try:
-        username = parser.get('github', 'username')
-        password = parser.get('github', 'password')
-        return username, password
-    except:
-        return None, None
+    username = keyring.get_password('github-search', 'username')
+    password = keyring.get_password('github-search', 'password')
+    return username, password
 
 
 def get_all(username, auth, item="repos"):
