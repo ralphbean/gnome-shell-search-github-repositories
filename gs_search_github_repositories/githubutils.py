@@ -9,6 +9,7 @@ import getpass
 import keyring
 import requests
 
+keyring_service = 'github-search-' + getpass.getuser()
 
 def _link_field_to_dict(field):
     """ Utility for ripping apart github's Link header field.
@@ -35,9 +36,8 @@ def load_auth():
     without diving into gnome-shell proper.  Gotta do that some day, I guess.
     """
 
-    service = 'github-search-' + getpass.getuser()
-    username = keyring.get_password(service, 'username')
-    password = keyring.get_password(service, 'password')
+    username = keyring.get_password(keyring_service, 'username')
+    password = keyring.get_password(keyring_service, 'password')
     return username, password
 
 
@@ -58,6 +58,14 @@ def get_all(username, auth, item="repos"):
     link = dict(next=url)
     while 'next' in link:
         response = requests.get(link['next'], auth=auth)
+
+        # If authn failed, then flush the busted creds from the keyring.
+        # This way, the user will be prompted for the password next time.
+        if response.status_code == 401:
+            keyring.set_password(keyring_service, 'username', '')
+            keyring.set_password(keyring_service, 'password', '')
+
+        # And.. if we didn't get good results, just bail.
         if response.status_code != 200:
             raise IOError("Non-200 status code %r" % response.status_code)
 
