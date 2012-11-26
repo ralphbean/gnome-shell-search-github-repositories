@@ -137,9 +137,8 @@ class SearchGithubRepositoriesService(dbus.service.Object):
         if not term in self._search_cache:
             username, password = auth = githubutils.load_auth()
 
-            # Not configured.. ~/.search-github is busted.
+            # Not configured.. creds must not be in the keyring.
             if not username:
-                # FIXME - this isn't totally working.
                 os.system(config_tool)
                 return []
 

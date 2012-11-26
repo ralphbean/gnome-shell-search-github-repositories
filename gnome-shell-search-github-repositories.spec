@@ -1,11 +1,8 @@
-%{!?python_sitelib: %global python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
-%{!?pyver: %global pyver %(%{__python} -c "import sys ; print sys.version[:3]")}
-
 %global modname gs_search_github_repositories
 %global busname org.gnome.githubrepositories.search
 
 Name:           gnome-shell-search-github-repositories
-Version:        1.0.1
+Version:        1.0.2
 Release:        1%{?dist}
 Summary:        Search your Github Repos from the gnome-shell
 
@@ -75,7 +72,7 @@ glib-compile-schemas %{_datadir}/glib-2.0/schemas &> /dev/null || :
 %{python_sitelib}/%{modname}/
 %{python_sitelib}/gnome_shell_search_github_repositories-%{version}-py%{pyver}.egg-info/
 
-%{_datadir}/gnome-shell-search-github/popup.glade
+%{_datadir}/gnome-shell-search-github/
 %{_datadir}/gnome-shell/search-providers/%{busname}.ini
 %{_datadir}/dbus-1/services/%{busname}.service
 %{_sysconfdir}/dbus-1/system.d/%{busname}.conf
@@ -83,6 +80,13 @@ glib-compile-schemas %{_datadir}/glib-2.0/schemas &> /dev/null || :
 
 
 %changelog
+* Mon Nov 26 2012 Ralph Bean <rbean@redhat.com> - 1.0.2-1
+- Removed unnecessary python macros.
+- Added ctrl-C workaround to the -config tool.
+
+* Mon Nov 26 2012 Ralph Bean <rbean@redhat.com> - 1.0.1-2
+- Own the data directory in which we put popup.glade.
+
 * Sat Nov 10 2012 Ralph Bean <rbean@redhat.com> - 1.0.1-1
 - No more ~/.search-github flat file with authn creds.
 - Prompt user for password with a gtk3 widget.
