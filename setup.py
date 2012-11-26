@@ -7,7 +7,7 @@ requires = [
 
 setup(
     name="gnome-shell-search-github-repositories",
-    version='1.0.1',
+    version='1.0.2',
     description="A gnome shell search provider for your github repos",
     url="http://github.com/ralphbean/gnome-shell-search-github-repositories",
     author="Ralph Bean",
