@@ -58,6 +58,12 @@ class lock_file(object):
 
 def main():
     with lock_file():
+
+        # Workaround to allow ctrl-C, as specified in:
+        # https://bugzilla.gnome.org/show_bug.cgi?id=622084
+        import signal
+        signal.signal(signal.SIGINT, signal.SIG_DFL)
+
         builder = Gtk.Builder()
         fname = "/usr/share/gnome-shell-search-github/popup.glade"
 
