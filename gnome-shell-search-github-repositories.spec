@@ -6,7 +6,7 @@
 
 Name:           gnome-shell-search-github-repositories
 Version:        1.0.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Search your Github Repos from the gnome-shell
 
 License:        GPLv3+
@@ -75,7 +75,7 @@ glib-compile-schemas %{_datadir}/glib-2.0/schemas &> /dev/null || :
 %{python_sitelib}/%{modname}/
 %{python_sitelib}/gnome_shell_search_github_repositories-%{version}-py%{pyver}.egg-info/
 
-%{_datadir}/gnome-shell-search-github/popup.glade
+%{_datadir}/gnome-shell-search-github/
 %{_datadir}/gnome-shell/search-providers/%{busname}.ini
 %{_datadir}/dbus-1/services/%{busname}.service
 %{_sysconfdir}/dbus-1/system.d/%{busname}.conf
@@ -83,6 +83,9 @@ glib-compile-schemas %{_datadir}/glib-2.0/schemas &> /dev/null || :
 
 
 %changelog
+* Mon Nov 26 2012 Ralph Bean <rbean@redhat.com> - 1.0.1-2
+- Own the data directory in which we put popup.glade.
+
 * Sat Nov 10 2012 Ralph Bean <rbean@redhat.com> - 1.0.1-1
 - No more ~/.search-github flat file with authn creds.
 - Prompt user for password with a gtk3 widget.
