@@ -2,8 +2,8 @@
 %global busname org.gnome.githubrepositories.search
 
 Name:           gnome-shell-search-github-repositories
-Version:        1.0.1
-Release:        2%{?dist}
+Version:        1.0.2
+Release:        1%{?dist}
 Summary:        Search your Github Repos from the gnome-shell
 
 License:        GPLv3+
@@ -80,6 +80,10 @@ glib-compile-schemas %{_datadir}/glib-2.0/schemas &> /dev/null || :
 
 
 %changelog
+* Mon Nov 26 2012 Ralph Bean <rbean@redhat.com> - 1.0.2-1
+- Removed unnecessary python macros.
+- Added ctrl-C workaround to the -config tool.
+
 * Mon Nov 26 2012 Ralph Bean <rbean@redhat.com> - 1.0.1-2
 - Own the data directory in which we put popup.glade.
 
